@@ -152,8 +152,8 @@ class Image : public RenderObject {
 			}
 		}
 		void setScale(float x, float y) {
-			sizeX = x * texture->getWidth();
-			sizeY = y * texture->getHeight();
+			sizeX = (int)(x * texture->getWidth());
+			sizeY = (int)(y * texture->getHeight());
 			dstRect->w = sizeX;
 			dstRect->h = sizeY;
 		};
@@ -169,11 +169,14 @@ class Image : public RenderObject {
 			dstRect->x = x;
 			dstRect->y = y;
 		}
-		void setClip(int xClip, int yClip, int width, int height) {
+		void setClip(int xClip, int yClip, int width, int height, bool rescale) {
 			srcRect->x = xClip;
 			srcRect->y = yClip;
 			srcRect->w = width;
 			srcRect->h = height;
+			if (rescale) {
+				setSize(width, height);
+			}
 		}
 		std::string name;
 		void free() {
@@ -196,7 +199,7 @@ class Renderer {
 		bool status;
 		Color bgColor;
 
-		bool renderLoop();
+		void renderLoop();
 		Line *drawLine(int x1, int y1, int x2, int y2, Color color, int z = 0);
 		Image *drawImage(int x, int y, Texture* tex, int z = 0, float scaleX = 1, float scaleY = 1);
 		Texture *createTexture(std::string path);
@@ -247,22 +250,13 @@ Renderer::~Renderer() {
 	free();
 }
 
-bool Renderer::renderLoop() {
-	bool quit = false;
-	SDL_Event e;
-	while (SDL_PollEvent(&e) != 0) {
-		if (e.type == SDL_QUIT) {
-			quit = true;
-		}
-	}
+void Renderer::renderLoop() {
 	SDL_SetRenderDrawColor(mRenderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	SDL_RenderClear(mRenderer);
 	for (int i = 0; i < renderObjects.size(); i++) {
 		renderObjects[i]->draw(mRenderer);
 	}
 	SDL_RenderPresent(mRenderer);
-
-	return quit;
 }
 
 Line *Renderer::drawLine(int x1, int y1, int x2, int y2, Color color, int z) {

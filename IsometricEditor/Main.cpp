@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "Input.hpp"
 #include <iostream>
 #include <vector>
 
@@ -20,7 +21,7 @@ int main(int argc, char* argv) {
 		return 1;
 	}
 
-	
+	InputManager input;
 
 	//------- Create Gridlines -------
 	std::vector<Line*> gridLines;
@@ -42,15 +43,29 @@ int main(int argc, char* argv) {
 			gridLines.push_back(renderer.drawLine(windowX + 1, y, 1, y + (windowX / 2), BLACK));
 		}
 	}
-	
+
+	//TEMP: Draw something
+	float x = 0;
 	Texture *tex = renderer.createTexture("res/templateTest.png");
 	tex->setBlendMode(ALPHA);
-	renderer.drawImage(89, 88, tex, 2)->setClip(0, 0, 100, 100);
+	Image* image = renderer.drawImage(89, 88, tex, 2);
+	image->setClip(0, 0, 100, 100, true);
 
 	bool quit = false;
 	int i = 0;
 	while (!quit) {
-		quit = renderer.renderLoop();
+		quit = input.inputLoop();
+
+		if (input.isDown("D")) {
+			x += 0.25;
+			image->setPosition((int)x, 0);
+		} else if (input.mouseDown(LeftButton)) {
+			x -= 0.25;
+			image->setPosition((int)x, 0);
+		}
+
+
+		renderer.renderLoop();
 	}
 
 	return 0;
