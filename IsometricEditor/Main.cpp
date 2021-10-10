@@ -1,6 +1,5 @@
 #include "Renderer.hpp"
 #include <iostream>
-#include <stdlib.h>
 #include <vector>
 
 const Color RED = { 0xFF, 0x00, 0x00, 0xFF };
@@ -46,15 +45,13 @@ int main(int argc, char* argv) {
 	
 	Texture *tex = renderer.createTexture("res/templateTest.png");
 	tex->setBlendMode(ALPHA);
-	renderer.drawImage(89, 88, tex, 2);
+	renderer.drawImage(89, 88, tex, 2)->setClip(0, 0, 100, 100);
 
 	bool quit = false;
 	int i = 0;
-	srand(100);
 	while (!quit) {
 		quit = renderer.renderLoop();
 	}
 
-	delete tex;
 	return 0;
 }

@@ -137,7 +137,8 @@ class Image : public RenderObject {
 			texture = tex;
 			sizeX = texture->getWidth();
 			sizeY = texture->getHeight();
-			srcRect = nullptr;
+			SDL_Rect* sRect = new SDL_Rect{ 0, 0, texture->getWidth(), texture->getHeight() };
+			srcRect = sRect;
 			SDL_Rect *dRect = new SDL_Rect{x, y, texture->getWidth(), texture->getHeight() };
 			dstRect = dRect;
 			name = namee;
@@ -146,7 +147,7 @@ class Image : public RenderObject {
 		Texture* texture;
 		void draw(SDL_Renderer *renderer) {
 			//SDL_Renderer* renderer = getRenderObj();
-			if (SDL_RenderCopy(renderer, texture->getTextureObject(), NULL, dstRect) != 0) {
+			if (SDL_RenderCopy(renderer, texture->getTextureObject(), srcRect, dstRect) != 0) {
 				std::cout << "Error drawing image, SDL_Error: " << SDL_GetError() << std::endl;
 			}
 		}
@@ -167,6 +168,12 @@ class Image : public RenderObject {
 			y = posY;
 			dstRect->x = x;
 			dstRect->y = y;
+		}
+		void setClip(int xClip, int yClip, int width, int height) {
+			srcRect->x = xClip;
+			srcRect->y = yClip;
+			srcRect->w = width;
+			srcRect->h = height;
 		}
 		std::string name;
 		void free() {
@@ -198,6 +205,7 @@ class Renderer {
 	private:
 		SDL_Window* mWindow;
 		SDL_Renderer* mRenderer;
+		std::vector<Texture*> textures;
 };
 
 Renderer::Renderer(int w, int h, std::string windowName) : renderObjects(0, NULL) {
@@ -306,12 +314,17 @@ Image* Renderer::drawImage(int x, int y, Texture* tex, int z, float scaleX, floa
 
 Texture *Renderer::createTexture(std::string path) {
 	Texture *texture = new Texture(mRenderer, path);
+	textures.push_back(texture);
 	return texture;
 }
 
 void Renderer::free() {
 	for (int i = 0; i < renderObjects.size(); i++) {
 		delete renderObjects[i];
+	}
+
+	for (int i = 0; i < textures.size(); i++) {
+		delete textures[i];
 	}
 
 	SDL_DestroyRenderer(mRenderer);
