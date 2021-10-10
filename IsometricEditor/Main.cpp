@@ -12,14 +12,16 @@ const Color WHITE = { 0xFF, 0xFF, 0xFF, 0xFF };
 const int BLOCK_SIZE = 48;
 
 int main(int argc, char* argv) {
-	int windowX = 1920;
-	int windowY = 1080;
+	int windowX = 1080;
+	int windowY = 720;
 	
 	Renderer renderer(windowX, windowY, "Isometric Editor");
 	if (renderer.status == false) {
 		std::cout << "Renderer failed to initialize" << std::endl;
 		return 1;
 	}
+
+	
 
 	//------- Create Gridlines -------
 	std::vector<Line*> gridLines;
@@ -42,11 +44,17 @@ int main(int argc, char* argv) {
 		}
 	}
 	
+	Texture *tex = renderer.createTexture("res/templateTest.png");
+	tex->setBlendMode(ALPHA);
+	renderer.drawImage(89, 88, tex, 2);
+
 	bool quit = false;
 	int i = 0;
 	srand(100);
 	while (!quit) {
 		quit = renderer.renderLoop();
 	}
+
+	delete tex;
 	return 0;
 }
