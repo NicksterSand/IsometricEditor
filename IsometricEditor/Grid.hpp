@@ -57,9 +57,9 @@ class Grid {
 			}
 			int y1Bottom = (-1 * y1Top) + 22;
 			int gridY;
-			if (modY > y1Bottom) {
+			if ((modY - 1) > y1Bottom) {
 				gridY = 2 + (2 * ySection);
-			} else if (modY < y1Top) {
+			} else if ((modY - 1) < y1Top) {
 				gridY = 2 * ySection;
 			} else {
 				gridY = 1 + (2 * ySection);

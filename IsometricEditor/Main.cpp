@@ -40,6 +40,11 @@ int main(int argc, char* argv) {
 		Pair highlightPos = grid.getGridPixelFromSquare(highlightedSquare.x, highlightedSquare.y);
 		highlighter->setPosition(highlightPos.x, highlightPos.y);
 
+		if (input.isDown("A")) {
+			std::cout << input.mouseX << ", " << input.mouseY << std::endl;
+			std::cout << highlightedSquare.x << ", " << highlightedSquare.y << std::endl;
+		}
+
 		renderer.renderLoop();
 	}
 
