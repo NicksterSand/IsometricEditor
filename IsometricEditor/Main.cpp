@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 #include "Input.hpp"
 #include "Grid.hpp"
+#include "SpriteSheet.hpp"
 #include <iostream>
 #include <vector>
 
@@ -27,9 +28,18 @@ int main(int argc, char* argv) {
 	Grid grid(windowX, windowY, BLOCK_SIZE, BLACK, &renderer);
 	grid.drawGrid();
 
-	Texture *tex = renderer.createTexture("res/highlight.png");
-	tex->setBlendMode(ALPHA);
-	Image* highlighter = renderer.drawImage(0, 0, tex, 1);
+	Texture* phantomTex = renderer.createTexture("res/templateTest.png");
+	phantomTex->setBlendMode(ALPHA);
+	phantomTex->setAlpha(150);
+
+	std::vector<SpriteSheetSprite> spriteVec;
+	SpriteSheetSprite testSprite(416, 240, 48, 48, 0, 24);
+	spriteVec.push_back(testSprite);
+	SpriteSheet templateSheet(phantomTex, spriteVec);
+
+	Image* newHighlighter = templateSheet.drawSprite(&renderer, 0, 100, 100, 2);
+
+	//288, 112
 
 	bool quit = false;
 	int i = 0;
@@ -38,7 +48,7 @@ int main(int argc, char* argv) {
 
 		Pair highlightedSquare = grid.getSquareFromGridPixel(input.mouseX, input.mouseY);
 		Pair highlightPos = grid.getGridPixelFromSquare(highlightedSquare.x, highlightedSquare.y);
-		highlighter->setPosition(highlightPos.x, highlightPos.y);
+		newHighlighter->setPosition(highlightPos.x, highlightPos.y);
 
 		if (input.isDown("A")) {
 			std::cout << input.mouseX << ", " << input.mouseY << std::endl;

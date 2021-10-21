@@ -15,6 +15,13 @@ struct Color {
 	int a;
 };
 
+struct Clip {
+	int x;
+	int y;
+	int w;
+	int h;
+};
+
 class Texture {
 	public:
 		Texture(SDL_Renderer* renderer, std::string path) {
@@ -133,15 +140,16 @@ class Line : public RenderObject {
 
 class Image : public RenderObject {
 	public:
-		Image(Texture* tex, SDL_Renderer* render, std::vector<RenderObject*>* vect, std::string namee) : RenderObject(render, vect) {
+		Image(Texture* tex, SDL_Renderer* render, std::vector<RenderObject*>* vect, int ox = 0, int oy = 0) : RenderObject(render, vect) {
 			texture = tex;
 			sizeX = texture->getWidth();
 			sizeY = texture->getHeight();
+			originX = ox;
+			originY = oy;
 			SDL_Rect* sRect = new SDL_Rect{ 0, 0, texture->getWidth(), texture->getHeight() };
 			srcRect = sRect;
-			SDL_Rect *dRect = new SDL_Rect{x, y, texture->getWidth(), texture->getHeight() };
+			SDL_Rect *dRect = new SDL_Rect{x - originX, y - originY, texture->getWidth(), texture->getHeight() };
 			dstRect = dRect;
-			name = namee;
 		};
 		~Image() {free();};
 		Texture* texture;
@@ -166,8 +174,8 @@ class Image : public RenderObject {
 		void setPosition(int posX, int posY) {
 			x = posX;
 			y = posY;
-			dstRect->x = x;
-			dstRect->y = y;
+			dstRect->x = x - originX;
+			dstRect->y = y - originY;
 		}
 		void setClip(int xClip, int yClip, int width, int height, bool rescale) {
 			srcRect->x = xClip;
@@ -178,13 +186,29 @@ class Image : public RenderObject {
 				setSize(width, height);
 			}
 		}
-		std::string name;
+		void setClip(Clip clip, bool rescale) {
+			srcRect->x = clip.x;
+			srcRect->y = clip.y;
+			srcRect->w = clip.w;
+			srcRect->h = clip.h;
+			if (rescale) {
+				setSize(clip.w, clip.h);
+			}
+		}
+		void setOrigin(int ox, int oy) {
+			originX = ox;
+			originY = oy;
+			dstRect->x = x + originX;
+			dstRect->y = y + originY;
+		}
 		void free() {
 			delete dstRect;
 		}
 	private:
 		int sizeX;
 		int sizeY;
+		int originX;
+		int originY;
 		SDL_Rect* srcRect;
 		SDL_Rect* dstRect;
 };
@@ -201,7 +225,7 @@ class Renderer {
 
 		void renderLoop();
 		Line *drawLine(int x1, int y1, int x2, int y2, Color color, int z = 0);
-		Image *drawImage(int x, int y, Texture* tex, int z = 0, float scaleX = 1, float scaleY = 1);
+		Image *drawImage(int x, int y, Texture* tex, int z = 0, float scaleX = 1, float scaleY = 1, int ox = 0, int oy = 0);
 		Texture *createTexture(std::string path);
 		void free();
 		std::vector<RenderObject*> renderObjects;
@@ -282,8 +306,8 @@ Line *Renderer::drawLine(int x1, int y1, int x2, int y2, Color color, int z) {
 	return line;
 }
 
-Image* Renderer::drawImage(int x, int y, Texture* tex, int z, float scaleX, float scaleY) {
-	Image* image = new Image(tex, mRenderer, &renderObjects, "The image data saved");
+Image* Renderer::drawImage(int x, int y, Texture* tex, int z, float scaleX, float scaleY, int ox, int oy) {
+	Image* image = new Image(tex, mRenderer, &renderObjects, ox, oy);
 	image->setPosition(x, y);
 
 	int insertId = 0;
